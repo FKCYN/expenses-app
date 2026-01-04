@@ -1,15 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Heart } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
-export default function Login() {
-  const router = useRouter();
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
-  // app/login/page.tsx
+
+// Component ที่ใช้ useSearchParams ต้องแยกออกมา
+function LoginMessage() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
 
@@ -22,6 +20,14 @@ export default function Login() {
       });
     }
   }, [message]);
+
+  return null;
+}
+
+export default function Login() {
+  const router = useRouter();
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
 
   // Handle Login
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -59,16 +65,16 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center p-8 font-sans">
+      {/* Wrap useSearchParams component with Suspense */}
+      <Suspense fallback={null}>
+        <LoginMessage />
+      </Suspense>
+
       <div className="bg-white p-8 rounded-[40px] shadow-xl w-full max-w-sm flex flex-col items-center">
         <div className="w-20 h-20 bg-pink-100 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
           <Heart size={40} className="text-pink-500 fill-pink-500" />
         </div>
-        <h1 className="text-2xl font-bold text-pink-600 mb-2">
-          My Sweet Wallet
-        </h1>
-        <p className="text-pink-400 text-sm mb-8">
-          บันทึกรายจ่ายด้วยความรัก ❤️
-        </p>
+        <h1 className="text-2xl font-bold text-pink-600 mb-2">My Wallet</h1>
 
         <form onSubmit={handleLogin} className="w-full space-y-4">
           <div className="space-y-2">

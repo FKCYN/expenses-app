@@ -1,28 +1,26 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { getCurrentUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/client";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const payload = await getCurrentUser();
+    const supabase = createClient();
+    if (!payload) {
+      return NextResponse.json({ error: "ไม่ได้เข้าสู่ระบบ" }, { status: 401 });
     }
 
-    const secret = new TextEncoder().encode("user888");
-    const { payload } = await jwtVerify(token, secret);
+    const user_id = payload.user_id;
 
-    return NextResponse.json({
-      user_id: payload.user_id,
-      name: payload.name,
-    });
+    // Get user details
+    const { data } = await supabase
+      .from("user")
+      .select("user_id, name, role")
+      .eq("user_id", user_id)
+      .single();
+
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }

@@ -2,18 +2,20 @@
 import React, { useState, useEffect } from "react";
 import { User, LogOut } from "lucide-react";
 import NavBar from "../components/navBar";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
   const [expenses, setExpenses] = useState<any[]>([]);
-  const [userName, setUserName] = useState<string>("");
+  const [user, setUser] = useState<any>([]);
+  const router = useRouter();
 
   async function fetchUser() {
     try {
-      const response = await fetch("/api/auth/me");
-      if (response.ok) {
-        const data = await response.json();
-        setUserName(data.name);
-      }
+      const response = await axios.get("/api/auth/me");
+      const data = await response.data.data;
+      setUser(data);
     } catch (error) {
       console.log(error);
     }
@@ -21,14 +23,50 @@ export default function Dashboard() {
 
   async function fetchExpenses() {
     try {
-      const response = await fetch("/api/expenses");
-      if (response.ok) {
-        const data = await response.json();
-        setExpenses(data.data);
-      }
+      const response = await axios.get("/api/expenses");
+      const data = await response.data.data;
+      setExpenses(data);
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function handleLogout() {
+    try {
+      const response = await axios.post("/api/auth/logout");
+      const data = response.data;
+      console.log(response);
+      Swal.fire({
+        icon: "success",
+        title: `${data.message}`,
+        timer: 2000,
+        showConfirmButton: false,
+      }).then(() => {
+        router.push("/");
+      });
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // แปลง ISO timestamp เป็นวันที่ เช่น "4 ม.ค. 2026"
+  function formatDate(isoString: string) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString("th-TH", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  // แปลง ISO timestamp เป็นเวลา เช่น "00:11"
+  function formatTime(isoString: string) {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString("th-TH", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   useEffect(() => {
@@ -48,30 +86,23 @@ export default function Dashboard() {
               <User size={20} />
             </div>
             <span className="text-white font-medium">
-              สวัสดีจ้า! {userName}
+              สวัสดีจ้า! {user.name}
             </span>
           </div>
           <button
-            // onClick={() => setPage('login')}
+            onClick={handleLogout}
             className="text-white/80 hover:text-white"
           >
             <LogOut size={20} />
           </button>
         </div>
 
-        <div className="text-center text-white mb-2">
-          ยอดรวมที่จ่ายไป (เดือนนี้)
-        </div>
+        <div className="text-center text-white mb-2">ยอดรวมที่จ่ายไป</div>
         <div className="text-center text-4xl font-black text-white mb-4">
           ฿{totalExpense.toLocaleString()}
         </div>
 
         <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl p-4 flex justify-around">
-          <div className="text-center">
-            <div className="text-xs text-pink-100">เหลือในกระเป๋า</div>
-            <div className="text-lg font-bold text-white">฿ 5,200</div>
-          </div>
-          <div className="w-px bg-white/30"></div>
           <div className="text-center">
             <div className="text-xs text-pink-100">จำนวนรายการ</div>
             <div className="text-lg font-bold text-white">
@@ -80,7 +111,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
       {/* Content */}
       <div className="px-6 mt-8">
         <div className="flex justify-between items-center mb-4">
@@ -99,16 +129,16 @@ export default function Dashboard() {
                 <div>
                   <div className="font-bold text-gray-700">{item.title}</div>
                   <div className="text-xs text-gray-400">
-                    {item.date} • {item.category}
+                    {item.category} • วันที่ {formatDate(item.created_at)} เวลา{" "}
+                    {formatTime(item.created_at)}
                   </div>
                 </div>
               </div>
-              <div className="text-pink-600 font-bold">- ฿{item.amount}</div>
+              <div className="text-pink-600 font-bold"> ฿{item.amount}</div>
             </div>
           ))}
         </div>
       </div>
-
       <NavBar />
     </div>
   );

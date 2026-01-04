@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import axios from "axios";
+import Swal from "sweetalert2";
 export default function Add() {
   const supabase = createClient();
   const router = useRouter();
@@ -43,25 +45,22 @@ export default function Add() {
   async function addExpense(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
-      const response = await fetch("/api/expenses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          amount: formData.amount,
-          category: formData.category,
-        }),
+      const response = await axios.post("/api/expenses", {
+        title: formData.title,
+        amount: formData.amount,
+        category: formData.category,
+      });
+      const data = response.data.data;
+      Swal.fire({
+        icon: "success",
+        title: `บันทึกรายการสำเร็จ ${data.title} - ฿${data.amount}`,
+        timer: 3000,
+        showConfirmButton: false,
+      }).then(() => {
+        router.push("/dashboard");
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log(errorData.error);
-        return;
-      }
-
-      router.push("/dashboard");
+      return;
     } catch (error) {
       console.log(error);
     }

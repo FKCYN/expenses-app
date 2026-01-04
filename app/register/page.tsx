@@ -21,13 +21,13 @@ export default function Login() {
       });
       Swal.fire({
         icon: "success",
-        title: "Register Success",
+        title: "สมัครสมาชิกสำเร็จ",
       });
       router.push("/");
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Register Failed",
+        title: "เกิดข้อผิดพลาด",
       });
     }
   };
