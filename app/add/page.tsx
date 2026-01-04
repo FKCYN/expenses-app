@@ -12,8 +12,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import axios from "axios";
 import Swal from "sweetalert2";
+
 export default function Add() {
-  const supabase = createClient();
   const router = useRouter();
   const [formData, setFormData] = useState({
     title: "",
@@ -22,23 +22,23 @@ export default function Add() {
   });
   const [category, setCategory] = useState<any[]>([]);
 
-  async function fetchCategory() {
-    try {
-      const { data, error } = await supabase.from("category").select();
-
-      if (error) {
-        console.log(error);
-        return;
-      }
-      if (data) {
-        setCategory(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
+    async function fetchCategory() {
+      try {
+        const supabase = createClient(); // ย้ายมาใน useEffect
+        const { data, error } = await supabase.from("category").select();
+
+        if (error) {
+          console.log(error);
+          return;
+        }
+        if (data) {
+          setCategory(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
     fetchCategory();
   }, []);
 
