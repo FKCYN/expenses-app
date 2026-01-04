@@ -2,58 +2,33 @@
 import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 export default function Login() {
-  const router = useRouter();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
-  // app/login/page.tsx
-  const searchParams = useSearchParams();
-  const message = searchParams.get("message");
-
-  useEffect(() => {
-    if (message === "unauthorized") {
-      Swal.fire({
-        icon: "warning",
-        title: "กรุณาเข้าสู่ระบบ",
-        text: "เซสชั่นของคุณหมดอายุหรือยังไม่ได้เข้าสู่ระบบ",
-      });
-    }
-  }, [message]);
+  const [name, setName] = useState("");
+  const router = useRouter();
 
   // Handle Login
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/login", {
+      const response = await axios.post("/api/auth/register", {
         user_id: user,
         password,
+        name,
       });
-      console.log(response);
       Swal.fire({
         icon: "success",
-        title: "เข้าสู่ระบบสำเร็จ",
-        timer: 2000,
-        showConfirmButton: false,
-      }).then(() => {
-        router.push("/dashboard");
+        title: "Register Success",
       });
+      router.push("/");
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        Swal.fire({
-          icon: "error",
-          title: "เข้าสู่ระบบไม่สำเร็จ",
-          text: error.response.data.error || "เกิดข้อผิดพลาด กรุณาลองใหม่",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "เกิดข้อผิดพลาด",
-          text: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
-        });
-      }
+      Swal.fire({
+        icon: "error",
+        title: "Register Failed",
+      });
     }
   };
 
@@ -70,14 +45,14 @@ export default function Login() {
           บันทึกรายจ่ายด้วยความรัก ❤️
         </p>
 
-        <form onSubmit={handleLogin} className="w-full space-y-4">
+        <form onSubmit={handleRegister} className="w-full space-y-4">
           <div className="space-y-2">
             <label className="text-pink-500 text-sm font-medium ml-1">
               UserID
             </label>
             <input
               type="text"
-              placeholder="UserID"
+              placeholder="UserID สำหรับเข้าสู่ระบบ"
               value={user}
               onChange={(e) => setUser(e.target.value)}
               className="text-pink-800 w-full bg-pink-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-pink-300 transition-all outline-none"
@@ -97,19 +72,26 @@ export default function Login() {
               required
             />
           </div>
+          <div className="space-y-2">
+            <label className="text-pink-500 text-sm font-medium ml-1">
+              Name
+            </label>
+            <input
+              type="text"
+              placeholder="ชื่อของคุณ"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="text-pink-800 w-full bg-pink-50 border-none rounded-2xl py-3 px-4 focus:ring-2 focus:ring-pink-300 transition-all outline-none"
+              required
+            />
+          </div>
           <button
             type="submit"
             className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 mt-4"
           >
-            เข้าสู่ระบบ
+            สมัครสมาชิก
           </button>
         </form>
-        <button
-          onClick={() => router.push("/register")}
-          className="text-pink-400 text-sm mt-6 hover:underline"
-        >
-          สร้างบัญชีใหม่
-        </button>
       </div>
     </div>
   );
