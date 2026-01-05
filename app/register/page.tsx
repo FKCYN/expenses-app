@@ -14,7 +14,7 @@ export default function Login() {
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/register", {
+      await axios.post("/api/auth/register", {
         user_id: user,
         password,
         name,
@@ -39,11 +39,8 @@ export default function Login() {
           <Heart size={40} className="text-pink-500 fill-pink-500" />
         </div>
         <h1 className="text-2xl font-bold text-pink-600 mb-2">
-          My Sweet Wallet
+          My Expenses App
         </h1>
-        <p className="text-pink-400 text-sm mb-8">
-          บันทึกรายจ่ายด้วยความรัก ❤️
-        </p>
 
         <form onSubmit={handleRegister} className="w-full space-y-4">
           <div className="space-y-2">

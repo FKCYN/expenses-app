@@ -74,7 +74,9 @@ export default function Login() {
         <div className="w-20 h-20 bg-pink-100 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
           <Heart size={40} className="text-pink-500 fill-pink-500" />
         </div>
-        <h1 className="text-2xl font-bold text-pink-600 mb-2">My Wallet</h1>
+        <h1 className="text-2xl font-bold text-pink-600 mb-2">
+          My Expenses App
+        </h1>
 
         <form onSubmit={handleLogin} className="w-full space-y-4">
           <div className="space-y-2">
