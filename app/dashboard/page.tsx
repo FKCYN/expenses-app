@@ -50,6 +50,58 @@ export default function Dashboard() {
     }
   }
 
+  async function handleItemClick(item: any) {
+    const result = await Swal.fire({
+      title: item.title,
+      html: `<p class="text-gray-500">฿${item.amount}</p>`,
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: "✏️ แก้ไข",
+      denyButtonText: "🗑️ ลบ",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#ec4899",
+      denyButtonColor: "#ef4444",
+    });
+
+    if (result.isConfirmed) {
+      // ไปหน้าแก้ไข
+      router.push(`/edit/${item.id}`);
+    } else if (result.isDenied) {
+      // ยืนยันการลบ
+      const confirmDelete = await Swal.fire({
+        icon: "warning",
+        title: "ยืนยันการลบ?",
+        text: `ต้องการลบรายการ "${item.title}" หรือไม่?`,
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "ลบ",
+        cancelButtonText: "ยกเลิก",
+      });
+
+      if (confirmDelete.isConfirmed) {
+        try {
+          await axios.delete(`/api/expenses/${item.id}`);
+          Swal.fire({
+            icon: "success",
+            title: "ลบรายการสำเร็จ",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          // รีเฟรชข้อมูล
+          fetchExpenses();
+        } catch (error) {
+          console.log(error);
+          Swal.fire({
+            icon: "error",
+            title: "เกิดข้อผิดพลาด",
+            text: "ไม่สามารถลบรายการได้",
+          });
+        }
+      }
+    }
+  }
+
   // แปลง ISO timestamp เป็นวันที่ เช่น "4 ม.ค. 2026"
   function formatDate(isoString: string) {
     const date = new Date(isoString);
@@ -122,7 +174,8 @@ export default function Dashboard() {
           {expenses.map((item) => (
             <div
               key={item.id}
-              className="bg-white p-4 rounded-3xl shadow-sm flex items-center justify-between border border-pink-50 hover:shadow-md transition-shadow"
+              onClick={() => handleItemClick(item)}
+              className="bg-white p-4 rounded-3xl shadow-sm flex items-center justify-between border border-pink-50 hover:shadow-md transition-shadow cursor-pointer active:scale-[0.98]"
             >
               <div className="flex items-center space-x-4">
                 {/* <CategoryIcon category={item.category} /> */}

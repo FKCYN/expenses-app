@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     cookieStore.set("auth-token", token, {
       httpOnly: true, // ป้องกัน JavaScript access
-      secure: true, // ปิดไว้ก่อนสำหรับ local testing (เปิดเป็น true ตอน deploy HTTPS จริง)
+      secure: false, // ปิดไว้ก่อนสำหรับ local testing (เปิดเป็น true ตอน deploy HTTPS จริง)
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
