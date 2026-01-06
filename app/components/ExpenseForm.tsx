@@ -73,11 +73,31 @@ export default function ExpenseForm({
           category: formData.category,
         });
         const data = response.data.data;
+
+        // เรียก AI เพื่อสร้างข้อความแซว
+        let aiComment = null;
+        try {
+          const aiResponse = await axios.post("/api/ai/teasing", {
+            title: formData.title,
+            amount: Number(formData.amount),
+            category: formData.category,
+          });
+          aiComment = aiResponse.data.comment;
+        } catch (aiError) {
+          console.log("AI teasing error:", aiError);
+        }
+
         Swal.fire({
           icon: "success",
-          title: `บันทึกรายการสำเร็จ ${data.title} - ฿${data.amount}`,
-          timer: 3000,
-          showConfirmButton: false,
+          title: `บันทึกสำเร็จ! 💖`,
+          html: aiComment
+            ? `<div class="text-gray-600 mb-2">${data.title} - ฿${data.amount}</div>
+               <div class="bg-pink-50 p-3 rounded-xl text-pink-600 text-sm mt-2">
+                 🤖 ${aiComment}
+               </div>`
+            : `<div class="text-gray-600">${data.title} - ฿${data.amount}</div>`,
+          // timer: aiComment ? 5000 : 3000,
+          showConfirmButton: true,
         }).then(() => {
           router.push("/dashboard");
         });
@@ -91,7 +111,8 @@ export default function ExpenseForm({
         const data = response.data.data;
         Swal.fire({
           icon: "success",
-          title: `แก้ไขรายการสำเร็จ ${data.title} - ฿${data.amount}`,
+          title: `แก้ไขรายการสำเร็จ`,
+          html: `<div class="text-gray-600">${data.title} - ฿${data.amount}</div>`,
           timer: 3000,
           showConfirmButton: false,
         }).then(() => {
