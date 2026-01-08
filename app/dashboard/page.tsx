@@ -1,6 +1,14 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { User, LogOut, Utensils, ShoppingBag, Car, Gift } from "lucide-react";
+import {
+  User,
+  LogOut,
+  Utensils,
+  ShoppingBag,
+  Car,
+  Gift,
+  MessageCircle,
+} from "lucide-react";
 import NavBar from "../components/navBar";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -202,12 +210,20 @@ export default function Dashboard() {
               สวัสดีจ้า! {user.name}
             </span>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-white/80 hover:text-white"
-          >
-            <LogOut size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push("/chat")}
+              className="text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <MessageCircle size={24} />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-white/80 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
         </div>
 
         <div className="text-center text-white mb-2">วันนี้ใช้เงินไป</div>

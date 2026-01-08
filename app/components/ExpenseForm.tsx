@@ -77,7 +77,7 @@ export default function ExpenseForm({
         // เรียก AI เพื่อสร้างข้อความแซว
         let aiComment = null;
         try {
-          const aiResponse = await axios.post("/api/ai/teasing", {
+          const aiResponse = await axios.post("/api/ai/comment", {
             title: formData.title,
             amount: Number(formData.amount),
             category: formData.category,

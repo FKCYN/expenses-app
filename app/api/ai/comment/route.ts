@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/auth";
+import { GoogleGenAI } from "@google/genai";
 
 export async function POST(request: Request) {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const authUser = await requireAuth();
+
+    if (!authUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     // สร้าง prompt สำหรับ AI ให้แซวผู้ใช้
     const categoryNamesTh: { [key: string]: string } = {
       food: "อาหาร",
@@ -13,11 +20,6 @@ export async function POST(request: Request) {
     };
 
     const { title, amount, category } = await request.json();
-    const authUser = await requireAuth();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const supabase = await createClient();
     const today = new Date();
@@ -41,10 +43,8 @@ export async function POST(request: Request) {
       )
       .join("\n");
 
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      console.error("GEMINI_API_KEY is not set");
+    if (!ai) {
+      console.error("ai is not set");
       return NextResponse.json({ comment: null }, { status: 200 });
     }
 
@@ -105,34 +105,27 @@ ${dailyExpensesText || "วันนี้ยังไม่มีรายก�
 
     const userPrompt = `รายการ: ${title}, ราคา: ${amount}, หมวด: ${categoryTh}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+
+      config: {
+        systemInstruction: {
+          parts: [{ text: systemInstructionText }],
         },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemInstructionText }],
-          },
-          contents: [{ parts: [{ text: userPrompt }] }],
-          generationConfig: {
-            temperature: 0.8,
-            maxOutputTokens: 700,
-          },
-        }),
-      }
-    );
+        temperature: 0.8,
+        maxOutputTokens: 700,
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: userPrompt }],
+        },
+      ],
+    });
+    console.log(response);
 
-    if (!response.ok) {
-      console.error("Gemini API error:", await response.text());
-      return NextResponse.json({ comment: null }, { status: 200 });
-    }
-
-    const data = await response.json();
     const comment =
-      data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+      response.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
 
     return NextResponse.json({ comment }, { status: 200 });
   } catch (error) {
