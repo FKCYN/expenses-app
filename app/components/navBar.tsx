@@ -6,16 +6,14 @@ export default function NavBar() {
   const pathname = usePathname();
   return (
     <>
-      <button
-        onClick={() => router.push("/chat")}
-        className={`fixed bottom-24 right-4 p-4 rounded-full shadow-xl transition-all z-50 ${
-          pathname === "/chat"
-            ? "bg-pink-600 text-white scale-110"
-            : "bg-pink-500 text-white hover:bg-pink-600 active:scale-95"
-        }`}
-      >
-        <MessageCircle size={22} />
-      </button>
+      {pathname !== "/chat" && (
+        <button
+          onClick={() => router.push("/chat")}
+          className="fixed bottom-24 right-4 p-4 rounded-full shadow-xl transition-all z-50 bg-pink-500 text-white hover:bg-pink-600 active:scale-95"
+        >
+          <MessageCircle size={22} />
+        </button>
+      )}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-pink-100 flex justify-around py-4 px-6 rounded-t-3xl shadow-lg">
         <button
           onClick={() => router.push("/dashboard")}
