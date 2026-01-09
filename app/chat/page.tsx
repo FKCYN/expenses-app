@@ -35,7 +35,10 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const res = await axios.post("/api/ai/chat", { message: userMessage });
+      const res = await axios.post("/api/ai/chat", {
+        message: userMessage,
+        history: messages,
+      });
       const botReply = res.data.reply;
       setMessages((prev) => [...prev, { role: "bot", text: botReply }]);
     } catch (error) {

@@ -1,13 +1,28 @@
 // middleware.ts
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
+import { verifyToken } from "@/lib/jwt";
 
 // กำหนด protected routes ที่ต้อง login ก่อนถึงจะเข้าได้
 const protectedRoutes = ["/dashboard", "/add", "/history", "/edit"];
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get("auth-token");
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get("auth-token")?.value;
   const pathname = request.nextUrl.pathname;
+
+  // 1. ตรวจสอบความถูกต้องของ Token (ถ้ามี)
+  if (token) {
+    const payload = await verifyToken(token);
+    if (!payload) {
+      // ถ้ามี Token แต่ตรวจสอบไม่ผ่าน (เช่น หมดอายุ, ปลอมแปลง)
+      // ให้ Redirect ไปหน้า Login และลบ Cookie ทิ้ง
+      const response = NextResponse.redirect(
+        new URL("/?message=session_expired", request.url)
+      );
+      response.cookies.delete("auth-token");
+      return response;
+    }
+  }
 
   // เช็คว่าเป็น protected route หรือเปล่า
   const isProtectedRoute = protectedRoutes.some((route) =>
